@@ -20,14 +20,14 @@ resource "azurerm_subnet" "internal" {
 }
 
 resource "azurerm_public_ip" "public_ip" {
-  name                = "${var.vm_name}-publicIP"
+  name                = "test-network-publicIP"
   resource_group_name = azurerm_resource_group.RG.name
   location            = azurerm_resource_group.RG.location
   allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "NI" {
-  name                = "${var.vm_name}-nic"
+  name                = "test-network-nic"
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
 
@@ -42,7 +42,7 @@ resource "azurerm_network_interface" "NI" {
 resource "azurerm_windows_virtual_machine" "machin" {
   name                = "test"
   resource_group_name = azurerm_resource_group.RG.name
-  location            = "${var.location}"
+  location            = "East US"
   size                = "Standard_B1s"
   admin_username      = "adminuser"
   admin_password      = "P@$$w0rd1234!"
