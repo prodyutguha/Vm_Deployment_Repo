@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "RG" {
 }
 
 resource "azurerm_virtual_network" "VN" {
-  name                = "${var.vm_name}-network"
+  name                = "test-network"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
@@ -40,12 +40,12 @@ resource "azurerm_network_interface" "NI" {
 }
 
 resource "azurerm_windows_virtual_machine" "machin" {
-  name                = "${var.vm_name}"
+  name                = "test"
   resource_group_name = azurerm_resource_group.RG.name
   location            = "${var.location}"
-  size                = "${var.vm_size}"
-  admin_username      = "${var.admin_username}"
-  admin_password      = "${var.admin_password}"
+  size                = "Standard_B1s"
+  admin_username      = "adminuser"
+  admin_password      = "P@$$w0rd1234!"
   network_interface_ids = [
     azurerm_network_interface.NI.id,
   ]
