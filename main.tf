@@ -81,7 +81,7 @@ resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
   scopes                = [azurerm_resource_group.RG.id]
   description           = "description"
   target_resource_type  = "Microsoft.Compute/virtualMachines"
-  target_resource_location = "${var.location_name}"
+  target_resource_location = "East US"
   window_size           = "PT15M" #lookback period#
   frequency             = "PT5M" #check every#
   severity              = 0
