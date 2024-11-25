@@ -43,7 +43,7 @@ resource "azurerm_windows_virtual_machine" "machin" {
   name                = "test"
   resource_group_name = azurerm_resource_group.RG.name
   location            = "East US"
-  size                = "Standard_B1s"
+  size                = "Standard_G2"
   admin_username      = "adminuser"
   admin_password      = "P@$$w0rd1234!"
   network_interface_ids = [
@@ -52,14 +52,14 @@ resource "azurerm_windows_virtual_machine" "machin" {
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "StandardSSD_LRS"
+    storage_account_type = "Standard_LRS"
     disk_size_gb         = "512"
   }
 
   source_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
-    sku       = "2022-datacenter-g2"
+    sku       = "2019-Datacenter"
     version   = "latest"
   }
 }
