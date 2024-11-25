@@ -42,7 +42,7 @@ resource "azurerm_network_interface" "NI" {
 resource "azurerm_windows_virtual_machine" "machin" {
   name                = "test"
   resource_group_name = azurerm_resource_group.RG.name
-  location            = "East US"
+  location            = "East US 2"
   size                = "Standard_G2"
   admin_username      = "adminuser"
   admin_password      = "P@$$w0rd1234!"
