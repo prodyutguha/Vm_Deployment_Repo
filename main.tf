@@ -40,7 +40,7 @@ resource "azurerm_network_interface" "NI" {
 }
 
 resource "azurerm_windows_virtual_machine" "machin" {
-  name                = "test_prodyut"
+  name                = "testprodyut"
   resource_group_name = azurerm_resource_group.RG.name
   location            = "East US 2"
   size                = "Standard_G2"
