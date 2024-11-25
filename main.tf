@@ -1,12 +1,12 @@
 ############## Creating VM using Service Now #############################
 
 resource "azurerm_resource_group" "RG" {
-  name     = "Window_Server_Prodyut"
+  name     = "Window_Servers_Prodyut"
   location = "East US"
 }
 
 resource "azurerm_virtual_network" "VN" {
-  name                = "test-network"
+  name                = "prodyut-network"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
@@ -20,14 +20,14 @@ resource "azurerm_subnet" "internal" {
 }
 
 resource "azurerm_public_ip" "public_ip" {
-  name                = "test-network-publicIP"
+  name                = "prodyut-network-publicIP"
   resource_group_name = azurerm_resource_group.RG.name
   location            = azurerm_resource_group.RG.location
   allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "NI" {
-  name                = "test-network-nic"
+  name                = "prodyut-network-nic"
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
 
@@ -40,7 +40,7 @@ resource "azurerm_network_interface" "NI" {
 }
 
 resource "azurerm_windows_virtual_machine" "machin" {
-  name                = "test"
+  name                = "test_prodyut"
   resource_group_name = azurerm_resource_group.RG.name
   location            = "East US 2"
   size                = "Standard_G2"
