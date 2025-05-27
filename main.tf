@@ -96,7 +96,7 @@ resource "azurerm_windows_virtual_machine" "machin" {
   size                = "Standard_G2"
   admin_username      = "adminuser"
   admin_password      = "P@$$w0rd1234!"
-  enable_automatic_updates = false
+  enable_automatic_updates = true
   provision_vm_agent = true
   network_interface_ids = [
     azurerm_network_interface.NI.id,
