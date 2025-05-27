@@ -19,5 +19,5 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: hashicorp/setup-terraform@v3
-      - run: terraform init
+      - run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
       - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}"
