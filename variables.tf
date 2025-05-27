@@ -34,3 +34,13 @@
 # variable "tags" {
 #   type = map(string)
 # }
+
+variable "vm_name" {
+  description = "Name of the Virtual Machine"
+  type        = string
+}
+
+variable "os_type" {
+  description = "OS Type: Ubuntu or Windows"
+  type        = string
+}

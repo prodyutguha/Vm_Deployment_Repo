@@ -1,7 +1,7 @@
 # ############## Creating VM using Service Now #############################
 
 resource "azurerm_resource_group" "RG" {
-  name     = "Window_Servers_Prodyut"
+  name     = "${var.vm_name}-rg"
   location = "West Europe"
 }
 
@@ -89,15 +89,32 @@ resource "azurerm_network_interface_security_group_association" "network_interfa
   network_security_group_id = azurerm_network_security_group.NSG.id
 }
 
-resource "azurerm_windows_virtual_machine" "machin" {
-  name                = "testprodyut"
+# Choose OS image dynamically
+locals {
+  image_reference = var.os_type == "Windows" ? {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
+    version   = "latest"
+  } : {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+}
+# Create a Linux VM if os_type is Ubuntu, otherwise create a Windows VM
+
+resource "azurerm_linux_virtual_machine" "machin" {
+  count               = var.os_type == "Windows" ? 0 : 1
+  name                = var.vm_name
   resource_group_name = azurerm_resource_group.RG.name
-  location            = "West Europe"
+  location            = azurerm_resource_group.RG.location
   size                = "Standard_G2"
-  admin_username      = "adminuser"
-  admin_password      = "P@$$w0rd1234!"
-  enable_automatic_updates = true
-  provision_vm_agent = true
+  admin_username      = "azureuser"
+  admin_password      = "P@ssword1234!"
+  disable_password_authentication = false
+
   network_interface_ids = [
     azurerm_network_interface.NI.id,
   ]
@@ -105,19 +122,44 @@ resource "azurerm_windows_virtual_machine" "machin" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
+    name                 = "${var.vm_name}-osdisk"
     disk_size_gb         = "512"
   }
 
   source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2019-Datacenter"
-    version   = "latest"
+    publisher = local.image_reference.publisher
+    offer     = local.image_reference.offer
+    sku       = local.image_reference.sku
+    version   = local.image_reference.version
+  }
+}
+
+resource "azurerm_windows_virtual_machine" "vm" {
+  count               = var.os_type == "Windows" ? 1 : 0
+  name                = var.vm_name
+  resource_group_name = azurerm_resource_group.RG.name
+  location            = azurerm_resource_group.RG.location
+  size                = "Standard_G2"
+  admin_username      = "azureuser"
+  admin_password      = "P@ssword1234!"
+
+  network_interface_ids = [
+    azurerm_network_interface.NI.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    name                 = "${var.vm_name}-osdisk"
+    disk_size_gb         = "512"
   }
 
-  # tags = {
-  #   "Patch Group ID" = "T02-NONPROD-WEU-GR0"
-  # }
+  source_image_reference {
+    publisher = local.image_reference.publisher
+    offer     = local.image_reference.offer
+    sku       = local.image_reference.sku
+    version   = local.image_reference.version
+  }
 }
 
 resource "azurerm_monitor_action_group" "main" {
