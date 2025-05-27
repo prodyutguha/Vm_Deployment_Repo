@@ -132,6 +132,7 @@ resource "azurerm_linux_virtual_machine" "machin" {
     sku       = local.image_reference.sku
     version   = local.image_reference.version
   }
+
 }
 
 resource "azurerm_windows_virtual_machine" "vm" {
@@ -200,21 +201,21 @@ resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
 }
 
 
-resource "azurerm_managed_disk" "data_disk" {
-  name                 = "DataDisk-Window-VM-disk1"
-  location             = azurerm_resource_group.RG.location
-  resource_group_name  = azurerm_resource_group.RG.name
-  storage_account_type = "Standard_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = "128"
-}
+# resource "azurerm_managed_disk" "data_disk" {
+#   name                 = "DataDisk-Window-VM-disk1"
+#   location             = azurerm_resource_group.RG.location
+#   resource_group_name  = azurerm_resource_group.RG.name
+#   storage_account_type = "Standard_LRS"
+#   create_option        = "Empty"
+#   disk_size_gb         = "128"
+# }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "data_disk-att" {
-  managed_disk_id    = azurerm_managed_disk.data_disk.id
-  virtual_machine_id = azurerm_windows_virtual_machine.machin.id
-  lun                = "0"
-  caching            = "ReadWrite"
-}
+# resource "azurerm_virtual_machine_data_disk_attachment" "data_disk-att" {
+#   managed_disk_id    = azurerm_managed_disk.data_disk.id
+#   virtual_machine_id = azurerm_linux_virtual_machine.machin.id
+#   lun                = "0"
+#   caching            = "ReadWrite"
+# }
 
 # resource "azurerm_policy_definition" "patch_group_id_policy" {
 #   name         = "enforce-patch-group-id-tag"
