@@ -115,9 +115,9 @@ resource "azurerm_windows_virtual_machine" "machin" {
     version   = "latest"
   }
 
-  tags = {
-    "Patch Group ID" = "T02-NONPROD-WEU-GR0"
-  }
+  # tags = {
+  #   "Patch Group ID" = "T02-NONPROD-WEU-GR0"
+  # }
 }
 
 resource "azurerm_monitor_action_group" "main" {
@@ -209,52 +209,52 @@ resource "azurerm_virtual_machine_data_disk_attachment" "data_disk-att" {
 # }
 
 
-resource "azurerm_resource_group" "Patching_RG" {
-  name     = "Patching_Windows"
-  location = "West Europe"
-}
+# resource "azurerm_resource_group" "Patching_RG" {
+#   name     = "Patching_Windows"
+#   location = "West Europe"
+# }
 
-resource "azurerm_maintenance_configuration" "maintenance_configuration" {
-  for_each = { for Patch_Group_ID, properties in var.Patch_Group_ID : Patch_Group_ID => properties }
-  name  = each.key
-  resource_group_name  = azurerm_resource_group.Patching_RG.name
-  location  = "West Europe"
-  scope = "InGuestPatch"
-  in_guest_user_patch_mode = "User"
+# resource "azurerm_maintenance_configuration" "maintenance_configuration" {
+#   for_each = { for Patch_Group_ID, properties in var.Patch_Group_ID : Patch_Group_ID => properties }
+#   name  = each.key
+#   resource_group_name  = azurerm_resource_group.Patching_RG.name
+#   location  = "West Europe"
+#   scope = "InGuestPatch"
+#   in_guest_user_patch_mode = "User"
 
-  window {
-    start_date_time = var.start_date_time
-    expiration_date_time  = var.expiration_date_time
-    duration  = "02:00"
-    time_zone = "India Standard Time"
-    recur_every = each.value.recur_every
-  }
+#   window {
+#     start_date_time = var.start_date_time
+#     expiration_date_time  = var.expiration_date_time
+#     duration  = "02:00"
+#     time_zone = "India Standard Time"
+#     recur_every = each.value.recur_every
+#   }
 
-  install_patches {
-    windows {
-      classifications_to_include  = var.classifications_to_include
-      kb_numbers_to_exclude  = var.kb_number_to_exclude
-      kb_numbers_to_include  = var.kb_number_to_include
-    }
-    reboot  = "Always"
-  }
-  #tags = var.tags
-}
+#   install_patches {
+#     windows {
+#       classifications_to_include  = var.classifications_to_include
+#       kb_numbers_to_exclude  = var.kb_number_to_exclude
+#       kb_numbers_to_include  = var.kb_number_to_include
+#     }
+#     reboot  = "Always"
+#   }
+#   #tags = var.tags
+# }
 
 
-resource "azurerm_maintenance_assignment_dynamic_scope" "maintenance_assignment_dynamic" {
-  for_each = { for Patch_Group_ID, properties in var.Patch_Group_ID : Patch_Group_ID => properties }
-  name = "scope-${each.key}"
-  maintenance_configuration_id = azurerm_maintenance_configuration.maintenance_configuration[each.key].id
+# resource "azurerm_maintenance_assignment_dynamic_scope" "maintenance_assignment_dynamic" {
+#   for_each = { for Patch_Group_ID, properties in var.Patch_Group_ID : Patch_Group_ID => properties }
+#   name = "scope-${each.key}"
+#   maintenance_configuration_id = azurerm_maintenance_configuration.maintenance_configuration[each.key].id
 
-  filter {
-    locations = ["East US"]
-    os_types = ["Windows"]
-    resource_groups = ["azurerm_resource_group.RG.name"]
-    resource_types = ["Microsoft.Compute/virtualMachines"]
-    tags {
-      tag = "Patch Group ID"
-      values = [each.key]
-    }
-  }
-}
+#   filter {
+#     locations = ["East US"]
+#     os_types = ["Windows"]
+#     resource_groups = ["azurerm_resource_group.RG.name"]
+#     resource_types = ["Microsoft.Compute/virtualMachines"]
+#     tags {
+#       tag = "Patch Group ID"
+#       values = [each.key]
+#     }
+#   }
+# }
