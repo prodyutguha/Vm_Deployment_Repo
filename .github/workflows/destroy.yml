@@ -1,11 +1,11 @@
-name: Deploy Azure VM Manually
+name: Destroy Azure VM Manually
 
 on:
   workflow_dispatch:
 
 jobs:
-  terraform:
-    name: Terraform Apply
+  destroy:
+    name: Terraform Destroy
     runs-on: ubuntu-latest
 
     steps:
@@ -23,8 +23,5 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
