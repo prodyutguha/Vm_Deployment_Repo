@@ -4,17 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       vm_name:
-        description: "VM Name"
+        description: "VM Name (e.g., prodyut)"
         required: true
       os_type:
-        description: "OS Type"
+        description: "OS Type (linux or windows)"
         required: true
+
 jobs:
   destroy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: Checkout Code
       uses: actions/checkout@v3
 
     - name: Set up Terraform
@@ -25,14 +26,24 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Terraform Init
+    - name: Terraform Init with State File
       run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
-    - name: Terraform Plan Targeted VM
-      run: terraform plan -target="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]" -var="os_type=${{ github.event.inputs.os_type }}" -var="vm_name=${{ github.event.inputs.vm_name }}"
+    - name: Terraform Plan Before Destroy
+      run: |
+        RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]"
+        echo "Planning to destroy $RESOURCE"
+        terraform plan \
+          -destroy \
+          -target="$RESOURCE" \
+          -var="vm_name=${{ github.event.inputs.vm_name }}" \
+          -var="os_type=${{ github.event.inputs.os_type }}"
 
     - name: Terraform Destroy Targeted VM
       run: |
-        RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]" 
+        RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]"
         echo "Destroying $RESOURCE"
-        terraform destroy -target=$RESOURCE -var="os_type=${{ github.event.inputs.os_type }}" -var="vm_name=${{ github.event.inputs.vm_name }}" -auto-approve
+        terraform destroy -auto-approve \
+          -target="$RESOURCE" \
+          -var="vm_name=${{ github.event.inputs.vm_name }}" \
+          -var="os_type=${{ github.event.inputs.os_type }}"
