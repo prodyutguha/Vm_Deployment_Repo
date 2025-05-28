@@ -1,4 +1,4 @@
-name: Destroy Entire Azure Infrastructure
+name: Destroy VM
 
 on:
   workflow_dispatch:
