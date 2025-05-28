@@ -58,7 +58,7 @@ terraform {
     resource_group_name = "RG-Terraform-Storage-Account"
     storage_account_name = "tfstorage43blrg"
     container_name       = "tfstate"
-    key                  = "terraform.tfstate"
+    key                  = "${var.vm_name}.tfstate"
   }
 
   required_providers {
