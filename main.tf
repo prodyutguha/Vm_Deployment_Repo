@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "RG" {
 }
 
 resource "azurerm_network_security_group" "NSG" {
-  name                = "prodyut-nsg"
+  name                = "${var.vm_name}-nsg"
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
 
@@ -51,7 +51,7 @@ resource "azurerm_network_security_group" "NSG" {
 }
 
 resource "azurerm_virtual_network" "VN" {
-  name                = "prodyut-network"
+  name                = "${var.vm_name}-network"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
@@ -65,14 +65,14 @@ resource "azurerm_subnet" "internal" {
 }
 
 resource "azurerm_public_ip" "public_ip" {
-  name                = "prodyut-network-publicIP"
+  name                = "${var.vm_name}-network-publicIP"
   resource_group_name = azurerm_resource_group.RG.name
   location            = azurerm_resource_group.RG.location
   allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "NI" {
-  name                = "prodyut-network-nic"
+  name                = "${var.vm_name}-network-nic"
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
 
