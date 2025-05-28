@@ -24,4 +24,4 @@ jobs:
         run: terraform init
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+        run: terraform destroy -auto-approve -target=${{ github.event.inputs.vm_name }}.tfstate"
