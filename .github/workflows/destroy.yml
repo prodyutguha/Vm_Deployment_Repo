@@ -30,6 +30,6 @@ jobs:
 
     - name: Terraform Destroy Targeted VM
       run: |
-        RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]"
+        RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]" 
         echo "Destroying $RESOURCE"
-        terraform destroy -auto-approve -target=$RESOURCE
+        terraform destroy -auto-approve -target=$RESOURCE -var="os_type=${{ github.event.inputs.os_type }}" -var="vm_name=${{ github.event.inputs.vm_name }}"
