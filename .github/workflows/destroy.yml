@@ -1,13 +1,10 @@
-name: Destroy Azure VM by Name and OS Type
+name: Destroy Azure VM by Name
 
 on:
   workflow_dispatch:
     inputs:
       vm_name:
         description: "Azure VM Name (e.g., prodyut)"
-        required: true
-      os_type:
-        description: "OS Type (linux or windows)"
         required: true
 
 jobs:
@@ -29,24 +26,19 @@ jobs:
     - name: Terraform Init
       run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
-    - name: Find Resource Address by VM Name and OS Type
+    - name: Find Resource Address by VM Name
       id: find_resource
       run: |
         VM_NAME="${{ github.event.inputs.vm_name }}"
-        OS_TYPE="${{ github.event.inputs.os_type }}"
-        RESOURCE_TYPE="azurerm_${OS_TYPE}_virtual_machine"
-
         RESOURCE=$(terraform state list | while read addr; do
-          if [[ "$addr" == ${RESOURCE_TYPE}.* ]]; then
-            if terraform state show "$addr" | grep -q "name *= *\"$VM_NAME\""; then
-              echo $addr
-              break
-            fi
+          if terraform state show "$addr" | grep -q "name *= *\"$VM_NAME\""; then
+            echo $addr
+            break
           fi
         done)
 
         if [ -z "$RESOURCE" ]; then
-          echo "No matching VM found for name $VM_NAME and OS type $OS_TYPE"
+          echo "No matching VM found for name $VM_NAME"
           exit 1
         fi
 
@@ -58,7 +50,3 @@ jobs:
 
     - name: Terraform Destroy
       run: terraform destroy -auto-approve -target=${{ steps.find_resource.outputs.resource }}
-
-    - name: Debug Resource Found
-      run: "echo Target resource: ${{ steps.find_resource.outputs.resource }}"
-
