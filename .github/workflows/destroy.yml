@@ -35,4 +35,4 @@ jobs:
       run: |
         RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]" 
         echo "Destroying $RESOURCE"
-        terraform destroy -target=$RESOURCE -var="os_type=${{ github.event.inputs.os_type }}" -var="vm_name=${{ github.event.inputs.vm_name }}" -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate" -auto-approve
+        terraform destroy -target=$RESOURCE -var="os_type=${{ github.event.inputs.os_type }}" -var="vm_name=${{ github.event.inputs.vm_name }}" -auto-approve
