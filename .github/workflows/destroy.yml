@@ -26,7 +26,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
     - name: Terraform Destroy Targeted VM
       run: |
