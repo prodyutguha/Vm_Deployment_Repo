@@ -6,6 +6,9 @@ on:
       vm_name:
         description: "Azure VM Name (e.g., prodyut)"
         required: true
+      os_type:
+        description: "OS Type"
+        required: true
 
 jobs:
   destroy:
