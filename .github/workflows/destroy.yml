@@ -28,6 +28,9 @@ jobs:
     - name: Terraform Init
       run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
+    - name: Terraform Plan Targeted VM
+      run: terraform plan -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
+
     - name: Terraform Destroy Targeted VM
       run: |
         RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]" 
