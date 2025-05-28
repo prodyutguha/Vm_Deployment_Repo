@@ -1,13 +1,10 @@
-name: Destroy Azure VM Manually
+name: Destroy Azure VM
 
 on:
   workflow_dispatch:
     inputs:
       vm_name:
-        description: "VM Name (e.g., prodyut)"
-        required: true
-      os_type:
-        description: "OS Type (linux or windows)"
+        description: "Azure VM Name (e.g., prodyut)"
         required: true
 
 jobs:
@@ -15,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Set up Terraform
@@ -26,27 +23,30 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Terraform Init with State File
+    - name: Terraform Init
       run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
-    - name: List resources in state
-      run: terraform state list
+    - name: Find Resource Address by VM Name
+      id: find_resource
+      run: |
+        VM_NAME="${{ github.event.inputs.vm_name }}"
+        RESOURCE=$(terraform state list | while read addr; do
+          if terraform state show "$addr" | grep -q "name *= *\"$VM_NAME\""; then
+            echo $addr
+            break
+          fi
+        done)
+
+        if [ -z "$RESOURCE" ]; then
+          echo "No matching VM found for name $VM_NAME"
+          exit 1
+        fi
+
+        echo "Found Terraform resource: $RESOURCE"
+        echo "resource=$RESOURCE" >> $GITHUB_OUTPUT
 
     - name: Terraform Plan Before Destroy
-      run: |
-        RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]"
-        echo "Planning to destroy $RESOURCE"
-        terraform plan \
-          -destroy \
-          -target="$RESOURCE" \
-          -var="vm_name=${{ github.event.inputs.vm_name }}" \
-          -var="os_type=${{ github.event.inputs.os_type }}"
+      run: terraform plan -destroy -target=${{ steps.find_resource.outputs.resource }}
 
-    - name: Terraform Destroy Targeted VM
-      run: |
-        RESOURCE="azurerm_${{ github.event.inputs.os_type }}_virtual_machine.${{ github.event.inputs.os_type }}_vm[\"${{ github.event.inputs.vm_name }}\"]"
-        echo "Destroying $RESOURCE"
-        terraform destroy -auto-approve \
-          -target="$RESOURCE" \
-          -var="vm_name=${{ github.event.inputs.vm_name }}" \
-          -var="os_type=${{ github.event.inputs.os_type }}"
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve -target=${{ steps.find_resource.outputs.resource }}
