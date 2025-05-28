@@ -55,9 +55,9 @@
 
 terraform {
   backend "azurerm" {
-    # resource_group_name = "RG-Terraform-Storage-Account"
-    # storage_account_name = "tfstorage43blrg"
-    # container_name       = "tfstate"
+    resource_group_name = "RG-Terraform-Storage-Account"
+    storage_account_name = "tfstorage43blrg"
+    container_name       = "tfstate"
     key                  = "${var.vm_name}.tfstate"
   }
 
