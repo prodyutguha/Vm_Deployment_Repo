@@ -1,10 +1,10 @@
-name: Destroy Azure VM Manually
+name: Destroy Entire Azure Infrastructure
 
 on:
   workflow_dispatch:
     inputs:
       vm_name:
-        description: "VM Name"
+        description: "VM Name (used for naming RG, VM, etc.)"
         required: true
       os_type:
         description: "OS Type (Windows or Linux)"
@@ -29,27 +29,14 @@ jobs:
       - name: Terraform Init
         run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
-      - name: Determine Resource to Destroy
-        id: resource
+      - name: Terraform Plan Destroy (Full RG)
         run: |
-          if [ "${{ github.event.inputs.os_type }}" = "Windows" ]; then
-            echo "resource=azurerm_windows_virtual_machine.vm[0]" >> $GITHUB_OUTPUT
-          else
-            echo "resource=azurerm_linux_virtual_machine.machin[0]" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Terraform Plan Destroy
-        run: |
-          echo "Planning destroy for: ${{ steps.resource.outputs.resource }}"
           terraform plan -destroy -input=false -lock=false \
-            -target="${{ steps.resource.outputs.resource }}" \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
             -var="os_type=${{ github.event.inputs.os_type }}"
 
-      - name: Terraform Destroy
+      - name: Terraform Destroy (Full RG)
         run: |
-          echo "Destroying: ${{ steps.resource.outputs.resource }}"
           terraform destroy -auto-approve -input=false -lock=false \
-            -target="${{ steps.resource.outputs.resource }}" \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
             -var="os_type=${{ github.event.inputs.os_type }}"
