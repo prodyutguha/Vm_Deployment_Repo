@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       vm_name:
-        description: "VM name (e.g. vm1)"
+        description: "VM Name"
         required: true
       os_type:
-        description: "OS Type (linux/windows)"
+        description: "OS Type"
         required: true
 jobs:
   destroy:
