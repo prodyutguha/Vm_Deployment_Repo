@@ -1,4 +1,4 @@
-name: Destroy Azure VM by Name
+name: Destroy VM
 
 on:
   workflow_dispatch:
