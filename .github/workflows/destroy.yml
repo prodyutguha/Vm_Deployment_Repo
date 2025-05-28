@@ -58,3 +58,7 @@ jobs:
 
     - name: Terraform Destroy
       run: terraform destroy -auto-approve -target=${{ steps.find_resource.outputs.resource }}
+
+    - name: Debug Resource Found
+      run: "echo Target resource: ${{ steps.find_resource.outputs.resource }}"
+
