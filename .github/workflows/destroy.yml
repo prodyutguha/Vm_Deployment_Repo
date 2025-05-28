@@ -26,6 +26,9 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: List resources in state
+      run: terraform state list
+
     - name: Terraform Init with State File
       run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
