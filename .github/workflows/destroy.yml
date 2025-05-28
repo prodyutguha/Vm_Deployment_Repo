@@ -6,6 +6,9 @@ on:
       vm_name:
         description: "Azure VM Name (e.g., prodyut)"
         required: true
+      os_type:
+        description: "OS Type (linux or windows)"
+        required: true
 
 jobs:
   destroy:
@@ -26,19 +29,24 @@ jobs:
     - name: Terraform Init
       run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
-    - name: Find Resource Address by VM Name
+    - name: Find Resource Address by VM Name and OS Type
       id: find_resource
       run: |
         VM_NAME="${{ github.event.inputs.vm_name }}"
+        OS_TYPE="${{ github.event.inputs.os_type }}"
+        RESOURCE_TYPE="azurerm_${OS_TYPE}_virtual_machine"
+
         RESOURCE=$(terraform state list | while read addr; do
-          if terraform state show "$addr" | grep -q "name *= *\"$VM_NAME\""; then
-            echo $addr
-            break
+          if [[ "$addr" == ${RESOURCE_TYPE}.* ]]; then
+            if terraform state show "$addr" | grep -q "name *= *\"$VM_NAME\""; then
+              echo $addr
+              break
+            fi
           fi
         done)
 
         if [ -z "$RESOURCE" ]; then
-          echo "No matching VM found for name $VM_NAME"
+          echo "No matching VM found for name $VM_NAME and OS type $OS_TYPE"
           exit 1
         fi
 
