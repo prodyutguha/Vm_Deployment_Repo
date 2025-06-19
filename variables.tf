@@ -49,3 +49,9 @@ variable "vm_size" {
   description = "VM size, e.g., Standard_G2"
   type        = string
 }
+
+
+variable "os_disk_size" {
+  description = "OS Disk size in GB"
+  type        = number
+}

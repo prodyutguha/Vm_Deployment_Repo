@@ -123,7 +123,7 @@ resource "azurerm_linux_virtual_machine" "machin" {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     name                 = "${var.vm_name}-osdisk"
-    disk_size_gb         = "512"
+    disk_size_gb         = var.os_disk_size
   }
 
   source_image_reference {
@@ -152,7 +152,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
     name                 = "${var.vm_name}-osdisk"
-    disk_size_gb         = "512"
+    disk_size_gb         = var.os_disk_size
   }
 
   source_image_reference {
