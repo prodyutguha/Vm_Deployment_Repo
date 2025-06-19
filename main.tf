@@ -90,19 +90,53 @@ resource "azurerm_network_interface_security_group_association" "network_interfa
 }
 
 # Choose OS image dynamically
+# locals {
+#   image_reference = var.os_type == "Windows" ? {
+#     publisher = "MicrosoftWindowsServer"
+#     offer     = "WindowsServer"
+#     sku       = "2019-Datacenter"
+#     version   = "latest"
+#   } : {
+#     publisher = "Canonical"
+#     offer     = "0001-com-ubuntu-server-jammy"
+#     sku       = "22_04-lts"
+#     version   = "latest"
+#   }
+# }
+
 locals {
-  image_reference = var.os_type == "Windows" ? {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2019-Datacenter"
-    version   = "latest"
-  } : {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
+  image_reference_map = {
+    "Windows Server 2019 Datacenter" = {
+      publisher = "MicrosoftWindowsServer"
+      offer     = "WindowsServer"
+      sku       = "2019-Datacenter"
+      version   = "latest"
+    }
+    "Windows Server 2022 Datacenter" = {
+      publisher = "MicrosoftWindowsServer"
+      offer     = "WindowsServer"
+      sku       = "2022-Datacenter"
+      version   = "latest"
+    }
+    "Ubuntu 20.04" = {
+      publisher = "Canonical"
+      offer     = "UbuntuServer"
+      sku       = "20_04-lts"
+      version   = "latest"
+    }
+    "Ubuntu 22.04" = {
+      publisher = "Canonical"
+      offer     = "0001-com-ubuntu-server-jammy"
+      sku       = "22_04-lts"
+      version   = "latest"
+    }
   }
+
+  image_reference = local.image_reference_map[var.os_type]
+
+  is_windows = contains(var.os_type, "Windows")
 }
+
 # Create a Linux VM if os_type is Ubuntu, otherwise create a Windows VM
 
 resource "azurerm_linux_virtual_machine" "machin" {
@@ -199,6 +233,35 @@ resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
     action_group_id = azurerm_monitor_action_group.main.id
   }
 }
+
+# Uncomment the following block if you want to create a data disk and attach it to the VM
+resource "azurerm_managed_disk" "datadisk" {
+  count                = var.data_disk_size > 0 ? 1 : 0
+  name                 = "${var.vm_name}-datadisk"
+  location             = azurerm_resource_group.RG.location
+  resource_group_name  = azurerm_resource_group.RG.name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = var.data_disk_size
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "datadisk_attach" {
+  count              = var.data_disk_size > 0 && local.is_windows ? 1 : 0
+  managed_disk_id    = azurerm_managed_disk.datadisk[0].id
+  virtual_machine_id = azurerm_windows_virtual_machine.vm[0].id
+  lun                = 0
+  caching            = "ReadWrite"
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "datadisk_attach_linux" {
+  count              = var.data_disk_size > 0 && !local.is_windows ? 1 : 0
+  managed_disk_id    = azurerm_managed_disk.datadisk[0].id
+  virtual_machine_id = azurerm_linux_virtual_machine.machin[0].id
+  lun                = 0
+  caching            = "ReadWrite"
+}
+
+
 
 
 # resource "azurerm_managed_disk" "data_disk" {

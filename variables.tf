@@ -55,3 +55,9 @@ variable "os_disk_size" {
   description = "OS Disk size in GB"
   type        = number
 }
+
+variable "data_disk_size" {
+  description = "Optional data disk size in GB"
+  type        = number
+  default     = 0
+}
