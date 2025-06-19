@@ -110,7 +110,7 @@ resource "azurerm_linux_virtual_machine" "machin" {
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.RG.name
   location            = azurerm_resource_group.RG.location
-  size                = "Standard_G2"
+  size                = var.vm_size
   admin_username      = "azureuser"
   admin_password      = "P@ssword1234!"
   disable_password_authentication = false
@@ -140,7 +140,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.RG.name
   location            = azurerm_resource_group.RG.location
-  size                = "Standard_G2"
+  size                = var.vm_size
   admin_username      = "azureuser"
   admin_password      = "P@ssword1234!"
 

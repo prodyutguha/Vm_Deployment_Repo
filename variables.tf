@@ -44,3 +44,8 @@ variable "os_type" {
   description = "OS Type: Ubuntu or Windows"
   type        = string
 }
+
+variable "vm_size" {
+  description = "VM size, e.g., Standard_G2"
+  type        = string
+}
