@@ -106,6 +106,18 @@ resource "azurerm_network_interface_security_group_association" "network_interfa
 
 locals {
   image_reference_map = {
+    "Ubuntu 20.04" = {
+      publisher = "Canonical"
+      offer     = "0001-com-ubuntu-server-focal"
+      sku       = "20_04-lts"
+      version   = "latest"
+    }
+    "Ubuntu 22.04" = {
+      publisher = "Canonical"
+      offer     = "0001-com-ubuntu-server-jammy"
+      sku       = "22_04-lts"
+      version   = "latest"
+    }
     "Windows Server 2019 Datacenter" = {
       publisher = "MicrosoftWindowsServer"
       offer     = "WindowsServer"
@@ -116,18 +128,6 @@ locals {
       publisher = "MicrosoftWindowsServer"
       offer     = "WindowsServer"
       sku       = "2022-Datacenter"
-      version   = "latest"
-    }
-    "Ubuntu 20.04" = {
-      publisher = "Canonical"
-      offer     = "UbuntuServer"
-      sku       = "20_04-lts"
-      version   = "latest"
-    }
-    "Ubuntu 22.04" = {
-      publisher = "Canonical"
-      offer     = "0001-com-ubuntu-server-jammy"
-      sku       = "22_04-lts"
       version   = "latest"
     }
   }
