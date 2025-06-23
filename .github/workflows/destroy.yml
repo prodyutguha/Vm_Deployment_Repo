@@ -47,12 +47,12 @@ jobs:
 
           VM_SIZE=$(jq -r '
             .values.root_module.resources[] 
-            | select(.type == "azurerm_linux_virtual_machine") 
+            | select(.type == "azurerm_linux_virtual_machine" or .type == "azurerm_windows_virtual_machine") 
             | .values.size' tfstate.json)
 
           OS_DISK_SIZE=$(jq -r '
             .values.root_module.resources[] 
-            | select(.type == "azurerm_linux_virtual_machine") 
+            | select(.type == "azurerm_linux_virtual_machine" or .type == "azurerm_windows_virtual_machine") 
             | .values.os_disk[0].disk_size_gb' tfstate.json)
 
           RAW_DATA_DISK_SIZE=$(jq -r '
