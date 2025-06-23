@@ -38,50 +38,53 @@ jobs:
       - name: Terraform Init
         run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
-      - name: Extract values from remote state
+      - name: Extract VM variables from state file
         id: extract
         run: |
           terraform show -json > tfstate.json
 
+          echo "🔍 Extracting values from Terraform state..."
+
           VM_SIZE=$(jq -r '
             .values.root_module.resources[] 
-            | select(.type == "azurerm_windows_virtual_machine" or .type == "azurerm_linux_virtual_machine") 
+            | select(.type == "azurerm_linux_virtual_machine") 
             | .values.size' tfstate.json)
 
           OS_DISK_SIZE=$(jq -r '
             .values.root_module.resources[] 
-            | select(.type == "azurerm_windows_virtual_machine" or .type == "azurerm_linux_virtual_machine") 
-            | .values.os_disk.disk_size_gb' tfstate.json)
+            | select(.type == "azurerm_linux_virtual_machine") 
+            | .values.os_disk[0].disk_size_gb' tfstate.json)
 
           DATA_DISK_SIZE=$(jq -r '
             .values.root_module.resources[] 
             | select(.type == "azurerm_managed_disk") 
             | .values.disk_size_gb' tfstate.json)
 
-          echo "Extracted from state:"
           echo "VM_SIZE=$VM_SIZE"
           echo "OS_DISK_SIZE=$OS_DISK_SIZE"
           echo "DATA_DISK_SIZE=$DATA_DISK_SIZE"
 
-          if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" == "null" ]; then
-            echo "❌ Error: vm_size not found in state"
+          # Fail if any variable is missing
+          if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" = "null" ]; then
+            echo "❌ Error: vm_size not found in Terraform state"
             exit 1
           fi
 
-          if [ -z "$OS_DISK_SIZE" ] || [ "$OS_DISK_SIZE" == "null" ]; then
-            echo "❌ Error: os_disk_size not found in state"
+          if [ -z "$OS_DISK_SIZE" ] || [ "$OS_DISK_SIZE" = "null" ]; then
+            echo "❌ Error: os_disk_size not found in Terraform state"
             exit 1
           fi
 
-          if [ -z "$DATA_DISK_SIZE" ] || [ "$DATA_DISK_SIZE" == "null" ]; then
-            echo "❌ Error: data_disk_size not found in state"
+          if [ -z "$DATA_DISK_SIZE" ] || [ "$DATA_DISK_SIZE" = "null" ]; then
+            echo "❌ Error: data_disk_size not found in Terraform state"
             exit 1
           fi
 
+          # Export to environment for later steps
           echo "VM_SIZE=$VM_SIZE" >> $GITHUB_ENV
           echo "OS_DISK_SIZE=$OS_DISK_SIZE" >> $GITHUB_ENV
           echo "DATA_DISK_SIZE=$DATA_DISK_SIZE" >> $GITHUB_ENV
-          
+
       - name: Terraform Plan Destroy (Full RG)
         run: |
           terraform plan -destroy -input=false -lock=false \
