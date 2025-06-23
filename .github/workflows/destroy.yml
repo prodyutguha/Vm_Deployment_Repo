@@ -55,7 +55,7 @@ jobs:
             | select(.type == "azurerm_linux_virtual_machine") 
             | .values.os_disk[0].disk_size_gb' tfstate.json)
 
-          DATA_DISK_SIZE=$(jq -r '
+          RAW_DATA_DISK_SIZE=$(jq -r '
             .values.root_module.resources[] 
             | select(.type == "azurerm_managed_disk") 
             | .values.disk_size_gb' tfstate.json)
@@ -68,7 +68,7 @@ jobs:
 
           echo "VM_SIZE=$VM_SIZE"
           echo "OS_DISK_SIZE=$OS_DISK_SIZE"
-          echo "DATA_DISK_SIZE=$DATA_DISK_SIZE"
+          echo "DATA_DISK_SIZE=$RAW_DATA_DISK_SIZE"
           #echo "OS_TYPE=$OS_TYPE"
 
           # # Fail if any variable is missing
@@ -82,10 +82,10 @@ jobs:
             exit 1
           fi
 
-          if [ -z "$DATA_DISK_SIZE" ] || [ "$DATA_DISK_SIZE" = "null" ]; then
-            echo "DATA_DISK_SIZE=0"
+          if [[ "$RAW_DATA_DISK_SIZE" =~ ^[0-9]+$ ]]; then
+            DATA_DISK_SIZE=$RAW_DATA_DISK_SIZE
           else
-            echo "DATA_DISK_SIZE=$DATA_DISK_SIZE" >> $GITHUB_ENV
+            DATA_DISK_SIZE=0
           fi
 
           # if [ -z "$OS_TYPE" ] || [ "$OS_TYPE" = "null" ]; then
