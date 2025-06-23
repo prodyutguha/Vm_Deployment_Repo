@@ -68,8 +68,7 @@ jobs:
 
           echo "VM_SIZE=$VM_SIZE"
           echo "OS_DISK_SIZE=$OS_DISK_SIZE"
-          echo "DATA_DISK_SIZE=$RAW_DATA_DISK_SIZE"
-          #echo "OS_TYPE=$OS_TYPE"
+          echo "DATA_DISK_SIZE=$DATA_DISK_SIZE"
 
           # # Fail if any variable is missing
           if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" = "null" ]; then
