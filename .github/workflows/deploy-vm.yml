@@ -19,6 +19,8 @@ on:
         description: "Data Disk Size (GB)"
         required: false
 
+
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -29,4 +31,11 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: hashicorp/setup-terraform@v3
       - run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
-      - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}" -var "vm_size=${{ github.event.inputs.vm_size }}" -var "os_disk_size=${{ github.event.inputs.os_disk_size }}" -var "data_disk_size=${{ github.event.inputs.data_disk_size }}"
+      - name: Set default value for data_disk_size if empty
+        run: |
+          if [ -z "${{ github.event.inputs.data_disk_size }}" ]; then
+            echo "DATA_DISK_SIZE=0" >> $GITHUB_ENV
+          else
+            echo "DATA_DISK_SIZE=${{ github.event.inputs.data_disk_size }}" >> $GITHUB_ENV
+          fi
+      - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}" -var "vm_size=${{ github.event.inputs.vm_size }}" -var "os_disk_size=${{ github.event.inputs.os_disk_size }}" -var "data_disk_size=$DATA_DISK_SIZE""

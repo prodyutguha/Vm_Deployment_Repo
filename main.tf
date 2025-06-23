@@ -264,7 +264,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "datadisk_attach_linux" 
 
 
 
-
 # resource "azurerm_managed_disk" "data_disk" {
 #   name                 = "DataDisk-Window-VM-disk1"
 #   location             = azurerm_resource_group.RG.location
