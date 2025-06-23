@@ -134,7 +134,7 @@ locals {
 
   image_reference = local.image_reference_map[var.os_type]
 
-  is_windows = contains(var.os_type, "Windows")
+  is_windows = contains(var.os_type, "Windows")? true : false
 }
 
 # Create a Linux VM if os_type is Ubuntu, otherwise create a Windows VM
