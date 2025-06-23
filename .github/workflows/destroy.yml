@@ -104,7 +104,6 @@ jobs:
         run: |
           terraform plan -destroy -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
-           # -var="os_type=$OS_TYPE" \
             -var="vm_size=$VM_SIZE" \
             -var="os_disk_size=$OS_DISK_SIZE" \
             -var="data_disk_size=$DATA_DISK_SIZE"
@@ -113,7 +112,6 @@ jobs:
         run: |
           terraform destroy -auto-approve -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
-            #-var="os_type=$OS_TYPE" \
             -var="vm_size=$VM_SIZE" \
             -var="os_disk_size=$OS_DISK_SIZE" \
             -var="data_disk_size=$DATA_DISK_SIZE"
