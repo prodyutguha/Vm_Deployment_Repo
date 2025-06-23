@@ -6,9 +6,9 @@ on:
       vm_name:
         description: "VM Name (used for naming RG, VM, etc.)"
         required: true
-      os_type:
-        description: "OS Type (Windows or Linux)"
-        required: true
+      # os_type:
+      #   description: "OS Type (Windows or Linux)"
+      #   required: true
       # vm_size:
       #   description: "VM Size"
       #   required: false
