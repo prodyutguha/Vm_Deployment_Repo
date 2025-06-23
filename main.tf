@@ -135,13 +135,15 @@ locals {
   image_reference = local.image_reference_map[var.os_type]
 
   #is_windows = can(var.os_type, "Windows")? true : false
-  is_windows = can(regex("Windows", var.os_type)) ? true : false
+  #is_windows = can(regex("Windows", var.os_type)) ? true : false
+  is_windows = can(regex("(?i)windows", var.os_type)) && regex("(?i)windows", var.os_type) != ""
 }
 
 # Create a Linux VM if os_type is Ubuntu, otherwise create a Windows VM
 
 resource "azurerm_linux_virtual_machine" "machin" {
-  count               = var.os_type == "Windows" ? 0 : 1
+  #count               = var.os_type == "Windows" ? 0 : 1
+  count               = local.is_windows ? 0 : 1
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.RG.name
   location            = azurerm_resource_group.RG.location
@@ -171,7 +173,8 @@ resource "azurerm_linux_virtual_machine" "machin" {
 }
 
 resource "azurerm_windows_virtual_machine" "vm" {
-  count               = var.os_type == "Windows" ? 1 : 0
+  #count               = var.os_type == "Windows" ? 1 : 0
+  count               = local.is_windows ? 1 : 0
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.RG.name
   location            = azurerm_resource_group.RG.location
