@@ -63,7 +63,8 @@ jobs:
           OS_TYPE=$(jq -r '
             .values.root_module.resources[] 
             | select(.type == "azurerm_linux_virtual_machine" or .type == "azurerm_windows_virtual_machine") 
-            | .values.source_image_reference.sku' tfstate.json)
+            | .values.source_image_reference[0].sku' tfstate.json)
+
 
           echo "VM_SIZE=$VM_SIZE"
           echo "OS_DISK_SIZE=$OS_DISK_SIZE"
@@ -71,33 +72,27 @@ jobs:
           echo "OS_TYPE=$OS_TYPE"
 
           # # Fail if any variable is missing
-          # if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" = "null" ]; then
-          #   echo "❌ Error: vm_size not found in Terraform state"
-          #   exit 1
-          # fi
+          if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" = "null" ]; then
+            echo "❌ Error: vm_size not found in Terraform state"
+            exit 1
+          fi
 
-          # if [ -z "$OS_DISK_SIZE" ] || [ "$OS_DISK_SIZE" = "null" ]; then
-          #   echo "❌ Error: os_disk_size not found in Terraform state"
-          #   exit 1
-          # fi
+          if [ -z "$OS_DISK_SIZE" ] || [ "$OS_DISK_SIZE" = "null" ]; then
+            echo "❌ Error: os_disk_size not found in Terraform state"
+            exit 1
+          fi
 
-          # if [ -z "$DATA_DISK_SIZE" ] || [ "$DATA_DISK_SIZE" = "null" ]; then
-          #   echo "❌ Error: data_disk_size not found in Terraform state"
-          #   exit 1
-          # fi
+          if [ -z "$DATA_DISK_SIZE" ] || [ "$DATA_DISK_SIZE" = "null" ]; then
+            echo "❌ Error: data_disk_size not found in Terraform state"
+            exit 1
+          fi
 
-          # if [ -z "$value" ] || [ "$value" = "null" ]; then
-          #   echo "❌ Error: $var is missing from state file"
-          #   exit 1
-          # fi
+          if [ -z "$OS_TYPE" ] || [ "$OS_TYPE" = "null" ]; then
+            echo "❌ Error: os_type not found in Terraform state"
+            exit 1
+          fi
 
-          # for var in VM_SIZE OS_DISK_SIZE DATA_DISK_SIZE OS_TYPE; do
-            value=$(eval echo \$$var)
-            if [ -z "$value" ] || [ "$value" = "null" ]; then
-              echo "❌ Error: $var is missing from state file"
-              exit 1
-            fi
-          done
+
 
           # Export to environment for later steps
           echo "VM_SIZE=$VM_SIZE" >> $GITHUB_ENV
