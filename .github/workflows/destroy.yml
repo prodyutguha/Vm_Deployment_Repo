@@ -60,16 +60,16 @@ jobs:
             | select(.type == "azurerm_managed_disk") 
             | .values.disk_size_gb' tfstate.json)
 
-          OS_TYPE=$(jq -r '
-            .values.root_module.resources[] 
-            | select(.type == "azurerm_linux_virtual_machine" or .type == "azurerm_windows_virtual_machine") 
-            | .values.source_image_reference[0].sku' tfstate.json)
+          # OS_TYPE=$(jq -r '
+          #   .values.root_module.resources[] 
+          #   | select(.type == "azurerm_linux_virtual_machine" or .type == "azurerm_windows_virtual_machine") 
+          #   | .values.source_image_reference[0].sku' tfstate.json)
 
 
           echo "VM_SIZE=$VM_SIZE"
           echo "OS_DISK_SIZE=$OS_DISK_SIZE"
           echo "DATA_DISK_SIZE=$DATA_DISK_SIZE"
-          echo "OS_TYPE=$OS_TYPE"
+          #echo "OS_TYPE=$OS_TYPE"
 
           # # Fail if any variable is missing
           if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" = "null" ]; then
@@ -87,10 +87,10 @@ jobs:
             exit 1
           fi
 
-          if [ -z "$OS_TYPE" ] || [ "$OS_TYPE" = "null" ]; then
-            echo "❌ Error: os_type not found in Terraform state"
-            exit 1
-          fi
+          # if [ -z "$OS_TYPE" ] || [ "$OS_TYPE" = "null" ]; then
+          #   echo "❌ Error: os_type not found in Terraform state"
+          #   exit 1
+          # fi
 
 
 
@@ -98,13 +98,13 @@ jobs:
           echo "VM_SIZE=$VM_SIZE" >> $GITHUB_ENV
           echo "OS_DISK_SIZE=$OS_DISK_SIZE" >> $GITHUB_ENV
           echo "DATA_DISK_SIZE=$DATA_DISK_SIZE" >> $GITHUB_ENV
-          echo "OS_TYPE=$OS_TYPE" >> $GITHUB_ENV
+          #echo "OS_TYPE=$OS_TYPE" >> $GITHUB_ENV
 
       - name: Terraform Plan Destroy (Full RG)
         run: |
           terraform plan -destroy -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
-            -var="os_type=$OS_TYPE" \
+           # -var="os_type=$OS_TYPE" \
             -var="vm_size=$VM_SIZE" \
             -var="os_disk_size=$OS_DISK_SIZE" \
             -var="data_disk_size=$DATA_DISK_SIZE"
@@ -113,7 +113,7 @@ jobs:
         run: |
           terraform destroy -auto-approve -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
-            -var="os_type=$OS_TYPE" \
+            #-var="os_type=$OS_TYPE" \
             -var="vm_size=$VM_SIZE" \
             -var="os_disk_size=$OS_DISK_SIZE" \
             -var="data_disk_size=$DATA_DISK_SIZE"
