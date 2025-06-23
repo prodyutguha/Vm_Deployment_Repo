@@ -83,8 +83,9 @@ jobs:
           fi
 
           if [ -z "$DATA_DISK_SIZE" ] || [ "$DATA_DISK_SIZE" = "null" ]; then
-            echo "❌ Error: data_disk_size not found in Terraform state"
-            exit 1
+            echo "DATA_DISK_SIZE=0" >> $GITHUB_ENV
+          else
+            echo "DATA_DISK_SIZE=$DATA_DISK_SIZE" >> $GITHUB_ENV
           fi
 
           # if [ -z "$OS_TYPE" ] || [ "$OS_TYPE" = "null" ]; then
