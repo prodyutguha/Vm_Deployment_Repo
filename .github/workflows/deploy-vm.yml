@@ -29,4 +29,4 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: hashicorp/setup-terraform@v3
       - run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
-      - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}" -var "vm_size=${{ github.event.inputs.vm_size }}" -var "os_disk_size=${{ github.event.inputs.os_disk_size }}"
+      - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}" -var "vm_size=${{ github.event.inputs.vm_size }}" -var "os_disk_size=${{ github.event.inputs.os_disk_size }}" -var "data_disk_size=${{ github.event.inputs.data_disk_size }}"
