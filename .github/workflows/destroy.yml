@@ -9,6 +9,15 @@ on:
       os_type:
         description: "OS Type (Windows or Linux)"
         required: true
+      # vm_size:
+      #   description: "VM Size"
+      #   required: false
+      # os_disk_size:
+      #   description: "OS Disk Size (GB)"
+      #   required: false
+      # data_disk_size:
+      #   description: "Data Disk Size (GB)"
+      #   required: false
 
 jobs:
   destroy:
@@ -29,14 +38,28 @@ jobs:
       - name: Terraform Init
         run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
 
+      - name: Extract values from state
+        run: |
+          terraform show -json > tfstate.json
+          export VM_SIZE=$(jq -r '.values.root_module.resources[] | select(.type=="azurerm_windows_virtual_machine" or .type=="azurerm_linux_virtual_machine") | .values.size' tfstate.json)
+          export OS_DISK_SIZE=$(jq -r '.values.root_module.resources[] | select(.type=="azurerm_windows_virtual_machine" or .type=="azurerm_linux_virtual_machine") | .values.os_disk.disk_size_gb' tfstate.json)
+          export DATA_DISK_SIZE=$(jq -r '.values.root_module.resources[] | select(.type=="azurerm_managed_disk") | .values.disk_size_gb // 0' tfstate.json)
+          
+
       - name: Terraform Plan Destroy (Full RG)
         run: |
           terraform plan -destroy -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
-            -var="os_type=${{ github.event.inputs.os_type }}"
+            -var="os_type=${{ github.event.inputs.os_type }}" \
+            -var="vm_size=$VM_SIZE" \
+            -var="os_disk_size=$OS_DISK_SIZE" \
+            -var="data_disk_size=$DATA_DISK_SIZE"
 
       - name: Terraform Destroy (Full RG)
         run: |
           terraform destroy -auto-approve -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
-            -var="os_type=${{ github.event.inputs.os_type }}"
+            -var="os_type=${{ github.event.inputs.os_type }}" \
+            -var="vm_size=$VM_SIZE" \
+            -var="os_disk_size=$OS_DISK_SIZE" \
+            -var="data_disk_size=$DATA_DISK_SIZE"
