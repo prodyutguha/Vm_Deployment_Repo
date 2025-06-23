@@ -83,7 +83,7 @@ jobs:
           fi
 
           if [ -z "$DATA_DISK_SIZE" ] || [ "$DATA_DISK_SIZE" = "null" ]; then
-            echo "DATA_DISK_SIZE=0" >> $GITHUB_ENV
+            echo "DATA_DISK_SIZE=0"
           else
             echo "DATA_DISK_SIZE=$DATA_DISK_SIZE" >> $GITHUB_ENV
           fi
