@@ -48,7 +48,7 @@ jobs:
 
       - name: Push to separate repo
         run: |
-          git clone https://${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git vm-configs
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git vm-configs
           cd vm-configs
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
