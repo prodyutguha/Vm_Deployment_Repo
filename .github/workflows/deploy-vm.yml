@@ -66,11 +66,24 @@ jobs:
       - name: Push to separate repo
         run: |
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git
+
           if [[ "$OS_TYPE" == *Windows* ]]; then
-            cp <<EOF > ${VM_NAME}.tf.tf vm_tf/
+            cat <<EOF > ${VM_NAME}.tf
+          resource "azurerm_windows_virtual_machine" "vm" {
+          name = "${VM_NAME}"
+          ...
+          }
+          EOF
           else
-            cp <<EOF > ${VM_NAME}.tf.tf vm_tf/
+            cat <<EOF > ${VM_NAME}.tf
+          resource "azurerm_linux_virtual_machine" "vm" {
+          name = "${VM_NAME}"
+          ...
+          }
+          EOF
           fi
+
+          cp ${VM_NAME}.tf vm_tf/
           cd vm_tf
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
