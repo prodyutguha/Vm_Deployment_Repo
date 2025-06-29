@@ -115,7 +115,8 @@ jobs:
       #       -var="os_type=${{ github.event.inputs.os_type }}" \
       #       -var="vm_size=${{ github.event.inputs.vm_size }}" \
       #       -var="os_disk_size=${{ github.event.inputs.os_disk_size }}" \
-      #       -var="data_disk_size=${{ github.event.inputs.data_disk_size }}"
+      #       -var="data_disk_size=${{ github.event.inputs.data_disk_size }}"\
+      #       -out=tfplan.tf
 
       - name: Terraform Destroy
         run: |
