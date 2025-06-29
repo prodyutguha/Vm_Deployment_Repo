@@ -104,19 +104,9 @@ resource "azurerm_network_interface_security_group_association" "network_interfa
 #   }
 # }
 
-locals {
-  # Map short codes to friendly OS names
-  os_type_map = {
-    "ubuntu20" = "Ubuntu 20.04"
-    "ubuntu22" = "Ubuntu 22.04"
-    "win2019"  = "Windows Server 2019 Datacenter"
-    "win2022"  = "Windows Server 2022 Datacenter"
-  }
-
-  # Resolve var.os_type from the form input into a full OS name
-  os_type_resolved = lookup(local.os_type_map, lower(var.os_type), "")
 
   # Image reference definitions
+locals {
   image_reference_map = {
     "Ubuntu 20.04" = {
       publisher = "Canonical"
@@ -144,12 +134,10 @@ locals {
     }
   }
 
-  # Get the final image reference, or error if invalid input
-  #image_reference = local.os_type_resolved != "" ? local.image_reference_map[local.os_type_resolved] : error("❌ Invalid os_type '${var.os_type}' provided. Valid values: ubuntu20, ubuntu22, win2019, win2022.")
-  image_reference = local.os_type_resolved != "" ? local.image_reference_map[local.os_type_resolved] : error("❌ Invalid os_type '${var.os_type}' provided. Valid values: ubuntu20, ubuntu22, win2019, win2022.")
+  #image_reference = local.image_reference_map[var.os_type]
 
-  # Determine if this is a Windows VM (for count or config decisions)
-  is_windows = length(regexall("Windows", local.os_type_resolved)) > 0
+  #is_windows = can(var.os_type, "Windows")? true : false
+  is_windows = can(regex("Windows", var.os_type)) ? true : false
 }
 
 
