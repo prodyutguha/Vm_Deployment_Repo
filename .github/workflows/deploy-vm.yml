@@ -46,20 +46,19 @@ jobs:
       #     echo "VM_NAME=${{ github.event.inputs.vm_name }}" >> $GITHUB_ENV
 
 
-      # - name: Push to separate repo
-      #   run: |
-      #     git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git vm-configs
-      #     cd vm-configs
-      #     git config user.name "github-actions[bot]"
-      #     git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Push to separate repo
+        run: |
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      #     if [[ "$OS_TYPE" == *Windows* ]]; then
-      #       cp ../windows-vm-${VM_NAME}.tf .
-      #       git add windows-vm-${VM_NAME}.tf
-      #     else
-      #       cp ../linux-vm-${VM_NAME}.tf .
-      #       git add linux-vm-${VM_NAME}.tf
-      #     fi
+          if [[ "$OS_TYPE" == *Windows* ]]; then
+            cp ../windows-vm-${VM_NAME}.tf .
+            git add windows-vm-${VM_NAME}.tf
+          else
+            cp ../linux-vm-${VM_NAME}.tf .
+            git add linux-vm-${VM_NAME}.tf
+          fi
 
-      #     git commit -m "Add ${OS_TYPE} VM config for ${VM_NAME}"
-      #     git push
+          git commit -m "Add ${OS_TYPE} VM config for ${VM_NAME}"
+          git push
