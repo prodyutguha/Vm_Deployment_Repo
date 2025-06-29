@@ -9,90 +9,119 @@ on:
       os_type:
         description: "OS Type (Windows or Linux)"
         required: true
+      vm_size:
+        description: "VM Size"
+        required: true
+      os_disk_size:
+        description: "OS Disk Size (GB)"
+        required: true
+      data_disk_size:
+        description: "Data Disk Size (GB)"
+        required: false
 
+
+        
 jobs:
-  destroy:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Azure Login
-        uses: azure/login@v1
+      - uses: actions/checkout@v3
+      - uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Terraform Init
-        run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
-
-      - name: Extract VM variables from state file
-        id: extract
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
+      - name: Set default value for data_disk_size if empty
         run: |
-          terraform show -json > tfstate.json
-
-          echo "🔍 Extracting values from Terraform state..."
-
-          VM_SIZE=$(jq -r '
-            .values.root_module.resources[] 
-            | select(.type == "azurerm_windows_virtual_machine" or .type == "azurerm_linux_virtual_machine") 
-            | .values.size // empty
-          ' tfstate.json)
-
-          OS_DISK_SIZE=$(jq -r '
-            .values.root_module.resources[] 
-            | select(.type == "azurerm_windows_virtual_machine" or .type == "azurerm_linux_virtual_machine") 
-            | .values.os_disk[0].disk_size_gb // empty
-          ' tfstate.json)
-
-          RAW_DATA_DISK_SIZE=$(jq -r '
-            .values.root_module.resources[] 
-            | select(.type == "azurerm_managed_disk") 
-            | .values.disk_size_gb // empty
-          ' tfstate.json)
-
-          if [[ "$RAW_DATA_DISK_SIZE" =~ ^[0-9]+$ ]]; then
-            DATA_DISK_SIZE=$RAW_DATA_DISK_SIZE
+          if [ -z "${{ github.event.inputs.data_disk_size }}" ]; then
+            echo "DATA_DISK_SIZE=0" >> $GITHUB_ENV
           else
-            DATA_DISK_SIZE=0
+            echo "DATA_DISK_SIZE=${{ github.event.inputs.data_disk_size }}" >> $GITHUB_ENV
           fi
 
-          echo "✅ Extracted values:"
-          echo "VM_SIZE=$VM_SIZE"
-          echo "OS_DISK_SIZE=$OS_DISK_SIZE"
-          echo "DATA_DISK_SIZE=$DATA_DISK_SIZE"
+# jobs:
+#   destroy:
+#     runs-on: ubuntu-latest
 
-          if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" = "null" ]; then
-            echo "❌ Error: vm_size not found in Terraform state"
-            exit 1
-          fi
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-          if [ -z "$OS_DISK_SIZE" ] || [ "$OS_DISK_SIZE" = "null" ]; then
-            echo "❌ Error: os_disk_size not found in Terraform state"
-            exit 1
-          fi
+#       - name: Set up Terraform
+#         uses: hashicorp/setup-terraform@v3
 
-          echo "VM_SIZE=$VM_SIZE" >> $GITHUB_ENV
-          echo "OS_DISK_SIZE=$OS_DISK_SIZE" >> $GITHUB_ENV
-          echo "DATA_DISK_SIZE=$DATA_DISK_SIZE" >> $GITHUB_ENV
+#       - name: Azure Login
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       - name: Terraform Init
+#         run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
+
+#       - name: Extract VM variables from state file
+#         id: extract
+#         run: |
+#           terraform show -json > tfstate.json
+
+#           echo "🔍 Extracting values from Terraform state..."
+
+#           VM_SIZE=$(jq -r '
+#             .values.root_module.resources[] 
+#             | select(.type == "azurerm_windows_virtual_machine" or .type == "azurerm_linux_virtual_machine") 
+#             | .values.size // empty
+#           ' tfstate.json)
+
+#           OS_DISK_SIZE=$(jq -r '
+#             .values.root_module.resources[] 
+#             | select(.type == "azurerm_windows_virtual_machine" or .type == "azurerm_linux_virtual_machine") 
+#             | .values.os_disk[0].disk_size_gb // empty
+#           ' tfstate.json)
+
+#           RAW_DATA_DISK_SIZE=$(jq -r '
+#             .values.root_module.resources[] 
+#             | select(.type == "azurerm_managed_disk") 
+#             | .values.disk_size_gb // empty
+#           ' tfstate.json)
+
+#           if [[ "$RAW_DATA_DISK_SIZE" =~ ^[0-9]+$ ]]; then
+#             DATA_DISK_SIZE=$RAW_DATA_DISK_SIZE
+#           else
+#             DATA_DISK_SIZE=0
+#           fi
+
+#           echo "✅ Extracted values:"
+#           echo "VM_SIZE=$VM_SIZE"
+#           echo "OS_DISK_SIZE=$OS_DISK_SIZE"
+#           echo "DATA_DISK_SIZE=$DATA_DISK_SIZE"
+
+#           if [ -z "$VM_SIZE" ] || [ "$VM_SIZE" = "null" ]; then
+#             echo "❌ Error: vm_size not found in Terraform state"
+#             exit 1
+#           fi
+
+#           if [ -z "$OS_DISK_SIZE" ] || [ "$OS_DISK_SIZE" = "null" ]; then
+#             echo "❌ Error: os_disk_size not found in Terraform state"
+#             exit 1
+#           fi
+
+#           echo "VM_SIZE=$VM_SIZE" >> $GITHUB_ENV
+#           echo "OS_DISK_SIZE=$OS_DISK_SIZE" >> $GITHUB_ENV
+#           echo "DATA_DISK_SIZE=$DATA_DISK_SIZE" >> $GITHUB_ENV
 
       - name: Terraform Plan Destroy
         run: |
           terraform plan -destroy -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
             -var="os_type=${{ github.event.inputs.os_type }}" \
-            -var="vm_size=$VM_SIZE" \
-            -var="os_disk_size=$OS_DISK_SIZE" \
-            -var="data_disk_size=$DATA_DISK_SIZE"
+            -var="vm_size=${{ github.event.inputs.vm_size }}" \
+            -var="os_disk_size=${{ github.event.inputs.os_disk_size }}" \
+            -var="data_disk_size=${{ github.event.inputs.data_disk_size }}"
 
       - name: Terraform Destroy
         run: |
           terraform destroy -auto-approve -input=false -lock=false \
             -var="vm_name=${{ github.event.inputs.vm_name }}" \
             -var="os_type=${{ github.event.inputs.os_type }}" \
-            -var="vm_size=$VM_SIZE" \
-            -var="os_disk_size=$OS_DISK_SIZE" \
-            -var="data_disk_size=$DATA_DISK_SIZE"
+            -var="vm_size=${{ github.event.inputs.vm_size }}" \
+            -var="os_disk_size=${{ github.event.inputs.os_disk_size }}" \
+            -var="data_disk_size=${{ github.event.inputs.data_disk_size }}"
