@@ -105,6 +105,18 @@ resource "azurerm_network_interface_security_group_association" "network_interfa
 # }
 
 locals {
+  # Map short inputs to internal long names
+  os_type_map = {
+    "ubuntu20" = "Ubuntu 20.04"
+    "ubuntu22" = "Ubuntu 22.04"
+    "win2019"  = "Windows Server 2019 Datacenter"
+    "win2022"  = "Windows Server 2022 Datacenter"
+  }
+
+  # Resolve friendly name from input, default to "" if not found
+  os_type_resolved = lookup(local.os_type_map, lower(var.os_type), "")
+
+  # Main image references
   image_reference_map = {
     "Ubuntu 20.04" = {
       publisher = "Canonical"
@@ -132,12 +144,13 @@ locals {
     }
   }
 
-  image_reference = local.image_reference_map[var.os_type]
+  # Resolve image or throw explicit error if not found
+  image_reference = local.os_type_resolved != "" ? local.image_reference_map[local.os_type_resolved] : (throw("❌ Invalid os_type '${var.os_type}' provided. Valid values are: ubuntu20, ubuntu22, win2019, win2022."))
 
-  #is_windows = can(var.os_type, "Windows")? true : false
-  #is_windows = can(regex("Windows", var.os_type)) ? true : false
-  is_windows = can(regex("(?i)windows", var.os_type)) && regex("(?i)windows", var.os_type) != ""
+  # Determine if resolved OS is Windows
+  is_windows = contains(local.os_type_resolved, "Windows")
 }
+
 
 # Create a Linux VM if os_type is Ubuntu, otherwise create a Windows VM
 
