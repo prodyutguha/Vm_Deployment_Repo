@@ -69,19 +69,19 @@ jobs:
 
           if [[ "$OS_TYPE" == *Windows* ]]; then
             cat <<EOF > ${VM_NAME}.tf
-          resource "azurerm_windows_virtual_machine" "vm" {
-          name = "${VM_NAME}"
+            resource "azurerm_windows_virtual_machine" "vm" {
+            name = "${VM_NAME}"
           ...
           }
           EOF
-          else
-            cat <<EOF > ${VM_NAME}.tf
-          resource "azurerm_linux_virtual_machine" "vm" {
-          name = "${VM_NAME}"
-          ...
-          }
+            else
+              cat <<EOF > ${VM_NAME}.tf
+              resource "azurerm_linux_virtual_machine" "vm" {
+              name = "${VM_NAME}"
+            ...
+            }
           EOF
-          fi
+            fi
 
           cp ${VM_NAME}.tf vm_tf/
           cd vm_tf
