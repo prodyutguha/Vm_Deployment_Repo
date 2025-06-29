@@ -38,18 +38,39 @@ jobs:
           else
             echo "DATA_DISK_SIZE=${{ github.event.inputs.data_disk_size }}" >> $GITHUB_ENV
           fi
-      - run: terraform plan -input=false -lock=false \
-          -var "vm_name=${{ github.event.inputs.vm_name }}" \
-          -var "os_type=${{ github.event.inputs.os_type }}" \
-          -var "vm_size=${{ github.event.inputs.vm_size }}" \
-          -var "os_disk_size=${{ github.event.inputs.os_disk_size }}" \
-          -var "data_disk_size=${{ github.event.inputs.data_disk_size }}" \
-          -out=${{ github.event.inputs.vm_name }}.tf
-
       - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}" -var "vm_size=${{ github.event.inputs.vm_size }}" -var "os_disk_size=${{ github.event.inputs.os_disk_size }}" -var "data_disk_size=$DATA_DISK_SIZE"
-      - run: terraform output -json > ${{ github.event.inputs.vm_name }}.tf
-      - name: Upload Terraform Output
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform-output
-          path: ${{ github.event.inputs.vm_name }}.tf
+      - name: Generate VM TF file
+        run: |
+          if [ "${{ github.event.inputs.os_type }}" = "Windows" ]; then
+          cat <<EOF > windows-vm-${{ github.event.inputs.vm_name }}.tf
+          resource "azurerm_windows_virtual_machine" "vm" {
+          name = "${{ github.event.inputs.vm_name }}"
+          ...
+          }
+          EOF
+          else
+          cat <<EOF > linux-vm-${{ github.event.inputs.vm_name }}.tf
+          resource "azurerm_linux_virtual_machine" "vm" {
+          name = "${{ github.event.inputs.vm_name }}"
+          ...
+          }
+          EOF
+          fi
+
+      - name: Push to separate repo
+        run: |
+          git clone https://${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git vm-configs
+          cd vm-configs
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ "${{ github.event.inputs.os_type }}" = "Windows" ]; then
+            cp ../windows-vm-${{ github.event.inputs.vm_name }}.tf .
+            git add windows-vm-${{ github.event.inputs.vm_name }}.tf
+          else
+            cp ../linux-vm-${{ github.event.inputs.vm_name }}.tf .
+            git add linux-vm-${{ github.event.inputs.vm_name }}.tf
+          fi
+
+          git commit -m "Add ${github.event.inputs.os_type} VM config for ${github.event.inputs.vm_name}"
+          git push
