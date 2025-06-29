@@ -148,7 +148,7 @@ locals {
   image_reference = local.os_type_resolved != "" ? local.image_reference_map[local.os_type_resolved] : (throw("❌ Invalid os_type '${var.os_type}' provided. Valid values are: ubuntu20, ubuntu22, win2019, win2022."))
 
   # Determine if resolved OS is Windows
-  is_windows = contains(local.os_type_resolved, "Windows")
+  is_windows = length(regexall("Windows", local.os_type_resolved)) > 0
 }
 
 
