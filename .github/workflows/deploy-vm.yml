@@ -39,23 +39,30 @@ jobs:
             echo "DATA_DISK_SIZE=${{ github.event.inputs.data_disk_size }}" >> $GITHUB_ENV
           fi
       - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}" -var "vm_size=${{ github.event.inputs.vm_size }}" -var "os_disk_size=${{ github.event.inputs.os_disk_size }}" -var "data_disk_size=$DATA_DISK_SIZE"
+
+      - name: Set environment variables
+        run: |
+          echo "OS_TYPE=${{ github.event.inputs.os_type }}" >> $GITHUB_ENV
+          echo "VM_NAME=${{ github.event.inputs.vm_name }}" >> $GITHUB_ENV
+
       - name: Generate VM TF file
         run: |
-          if [ "${{ github.event.inputs.os_type }}" = "Windows" ]; then
-          cat <<EOF > windows-vm-${{ github.event.inputs.vm_name }}.tf
-          resource "azurerm_windows_virtual_machine" "vm" {
-          name = "${{ github.event.inputs.vm_name }}"
+          if [[ "$OS_TYPE" == *Windows* ]]; then
+            cat <<EOF > ${VM_NAME}.tf
+            resource "azurerm_windows_virtual_machine" "vm" {
+            name = "${VM_NAME}"
           ...
           }
           EOF
           else
-          cat <<EOF > linux-vm-${{ github.event.inputs.vm_name }}.tf
-          resource "azurerm_linux_virtual_machine" "vm" {
-          name = "${{ github.event.inputs.vm_name }}"
+            cat <<EOF > ${VM_NAME}.tf
+            resource "azurerm_linux_virtual_machine" "vm" {
+            name = "${VM_NAME}"
           ...
           }
           EOF
-          fi
+            fi
+
 
       - name: Push to separate repo
         run: |
