@@ -30,6 +30,8 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
       - run: terraform init -backend-config="key=${{ github.event.inputs.vm_name }}.tfstate"
       - name: Set default value for data_disk_size if empty
         run: |
