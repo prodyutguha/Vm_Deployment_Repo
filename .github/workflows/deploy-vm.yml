@@ -40,26 +40,26 @@ jobs:
           fi
       - run: terraform apply -auto-approve -var "vm_name=${{ github.event.inputs.vm_name }}" -var "os_type=${{ github.event.inputs.os_type }}" -var "vm_size=${{ github.event.inputs.vm_size }}" -var "os_disk_size=${{ github.event.inputs.os_disk_size }}" -var "data_disk_size=$DATA_DISK_SIZE"
 
-      - name: Set environment variables
-        run: |
-          echo "OS_TYPE=${{ github.event.inputs.os_type }}" >> $GITHUB_ENV
-          echo "VM_NAME=${{ github.event.inputs.vm_name }}" >> $GITHUB_ENV
+      # - name: Set environment variables
+      #   run: |
+      #     echo "OS_TYPE=${{ github.event.inputs.os_type }}" >> $GITHUB_ENV
+      #     echo "VM_NAME=${{ github.event.inputs.vm_name }}" >> $GITHUB_ENV
 
 
-      - name: Push to separate repo
-        run: |
-          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git vm-configs
-          cd vm-configs
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+      # - name: Push to separate repo
+      #   run: |
+      #     git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/prodyutguha/vm_tf.git vm-configs
+      #     cd vm-configs
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if [[ "$OS_TYPE" == *Windows* ]]; then
-            cp ../windows-vm-${VM_NAME}.tf .
-            git add windows-vm-${VM_NAME}.tf
-          else
-            cp ../linux-vm-${VM_NAME}.tf .
-            git add linux-vm-${VM_NAME}.tf
-          fi
+      #     if [[ "$OS_TYPE" == *Windows* ]]; then
+      #       cp ../windows-vm-${VM_NAME}.tf .
+      #       git add windows-vm-${VM_NAME}.tf
+      #     else
+      #       cp ../linux-vm-${VM_NAME}.tf .
+      #       git add linux-vm-${VM_NAME}.tf
+      #     fi
 
-          git commit -m "Add ${OS_TYPE} VM config for ${VM_NAME}"
-          git push
+      #     git commit -m "Add ${OS_TYPE} VM config for ${VM_NAME}"
+      #     git push
