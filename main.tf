@@ -137,8 +137,7 @@ locals {
   #image_reference = local.image_reference_map[var.os_type]
 
   #is_windows = can(var.os_type, "Windows")? true : false
-  #is_windows = can(regex("Windows", var.os_type)) ? true : false
-  is_windows = can(regex("(?i)windows", var.os_type)) && regex("(?i)windows", var.os_type) != ""
+  is_windows = can(regex("Windows", var.os_type)) ? true : false
 }
 
 
