@@ -204,7 +204,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     version   = local.image_reference.version
   }
 
-  patch_mode = "customer"
+  patch_mode = "Manual"
 }
 
 resource "azurerm_monitor_action_group" "main" {
