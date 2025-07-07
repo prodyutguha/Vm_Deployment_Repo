@@ -185,6 +185,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   admin_password      = "P@ssword1234!"
   provision_vm_agent = true
   allow_extension_operations = true
+  enable_automatic_updates = false
 
   network_interface_ids = [
     azurerm_network_interface.NI.id,
