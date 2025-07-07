@@ -183,6 +183,8 @@ resource "azurerm_windows_virtual_machine" "vm" {
   size                = var.vm_size
   admin_username      = "azureuser"
   admin_password      = "P@ssword1234!"
+  provision_vm_agent = true
+  allow_extension_operations = true
 
   network_interface_ids = [
     azurerm_network_interface.NI.id,
@@ -201,6 +203,8 @@ resource "azurerm_windows_virtual_machine" "vm" {
     sku       = local.image_reference.sku
     version   = local.image_reference.version
   }
+
+  patch_mode = "customer"
 }
 
 resource "azurerm_monitor_action_group" "main" {
