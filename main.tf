@@ -205,7 +205,8 @@ resource "azurerm_windows_virtual_machine" "vm" {
     version   = local.image_reference.version
   }
 
-  patch_mode = "Manual"
+  patch_mode = "AutomaticByPlatform"
+  bypass_platform_safety_checks_on_user_schedule_enabled = true
 }
 
 resource "azurerm_monitor_action_group" "main" {
