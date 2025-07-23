@@ -207,6 +207,8 @@ resource "azurerm_windows_virtual_machine" "vm" {
 
   patch_mode = "AutomaticByPlatform"
   bypass_platform_safety_checks_on_user_schedule_enabled = true
+
+  tags = { "Patch Group ID" = "T02-NONPROD-WEU-GR0" }
 }
 
 resource "azurerm_monitor_action_group" "main" {
