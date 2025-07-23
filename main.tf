@@ -239,7 +239,7 @@ resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
     metric_name      = "Percentage CPU"
     aggregation      = "Maximum"
     operator         = "GreaterThan"
-    threshold        = 40
+    threshold        = 85
     #skip_metric_validation = true
   }
 
