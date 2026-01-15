@@ -231,41 +231,41 @@ resource "azurerm_monitor_action_group" "main" {
   }
 
 }
-############### Enable AAD Login Extension #############################
-resource "azurerm_virtual_machine_extension" "aad_login_windows" {
-  count                = local.is_windows ? 1 : 0
-  name                 = "AADLoginForWindows"
-  virtual_machine_id   = azurerm_windows_virtual_machine.vm[0].id
-  publisher            = "Microsoft.Azure.ActiveDirectory"
-  type                 = "AADLoginForWindows"
-  type_handler_version = "2.0"
+# ############### Enable AAD Login Extension #############################
+# resource "azurerm_virtual_machine_extension" "aad_login_windows" {
+#   count                = local.is_windows ? 1 : 0
+#   name                 = "AADLoginForWindows"
+#   virtual_machine_id   = azurerm_windows_virtual_machine.vm[0].id
+#   publisher            = "Microsoft.Azure.ActiveDirectory"
+#   type                 = "AADLoginForWindows"
+#   type_handler_version = "2.0"
 
-  settings = jsonencode({
-    mdmId = var.tenant_id
-  })
-}
+#   settings = jsonencode({
+#     mdmId = var.tenant_id
+#   })
+# }
 
-resource "azurerm_virtual_machine_extension" "aad_login_linux" {
-  count               = local.is_windows ? 0 : 1
-  name                = "AADLoginForLinux"
-  virtual_machine_id  = azurerm_linux_virtual_machine.machin[0].id
-  publisher           = "Microsoft.Azure.ActiveDirectory"
-  type                = "AADLoginForLinux"
-  type_handler_version = "1.0"
-  settings            = "{}"
-}
+# resource "azurerm_virtual_machine_extension" "aad_login_linux" {
+#   count               = local.is_windows ? 0 : 1
+#   name                = "AADLoginForLinux"
+#   virtual_machine_id  = azurerm_linux_virtual_machine.machin[0].id
+#   publisher           = "Microsoft.Azure.ActiveDirectory"
+#   type                = "AADLoginForLinux"
+#   type_handler_version = "1.0"
+#   settings            = "{}"
+# }
 
 
-data "azuread_group" "vm_login_group" {
-  display_name     = var.vm_login_group_name
-  security_enabled = true
-}
+# data "azuread_group" "vm_login_group" {
+#   display_name     = var.vm_login_group_name
+#   security_enabled = true
+# }
 
-resource "azurerm_role_assignment" "vm_login_group" {
-  scope                = local.is_windows ? azurerm_windows_virtual_machine.vm[0].id : azurerm_linux_virtual_machine.machin[0].id
-  role_definition_name = "Virtual Machine Administrator Login"
-  principal_id         = data.azuread_group.vm_login_group.object_id
-}
+# resource "azurerm_role_assignment" "vm_login_group" {
+#   scope                = local.is_windows ? azurerm_windows_virtual_machine.vm[0].id : azurerm_linux_virtual_machine.machin[0].id
+#   role_definition_name = "Virtual Machine Administrator Login"
+#   principal_id         = data.azuread_group.vm_login_group.object_id
+# }
 
 ################ Create CPU Utilization Alert #############################
 resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
