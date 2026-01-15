@@ -1,10 +1,12 @@
 # ############## Creating VM using Service Now #############################
 
+################# Create Resource Group ####################
 resource "azurerm_resource_group" "RG" {
   name     = "${var.vm_name}-rg"
   location = "West Europe"
 }
 
+### Create Network Security Group ########################
 resource "azurerm_network_security_group" "NSG" {
   name                = "${var.vm_name}-nsg"
   location            = azurerm_resource_group.RG.location
@@ -49,7 +51,7 @@ resource "azurerm_network_security_group" "NSG" {
     destination_address_prefix = "*"
   }
 }
-
+ ############### Create Network Interface #########################
 resource "azurerm_virtual_network" "VN" {
   name                = "${var.vm_name}-network"
   address_space       = ["10.0.0.0/16"]
@@ -84,6 +86,7 @@ resource "azurerm_network_interface" "NI" {
   }
 }
 
+############### Associate NSG with NIC #########################
 resource "azurerm_network_interface_security_group_association" "network_interface_security_group_association" {
   network_interface_id      = azurerm_network_interface.NI.id
   network_security_group_id = azurerm_network_security_group.NSG.id
@@ -105,7 +108,7 @@ resource "azurerm_network_interface_security_group_association" "network_interfa
 # }
 
 
-  # Image reference definitions
+############# Image reference definitions ##################################
 locals {
   image_reference_map = {
     "Ubuntu 20.04" = {
@@ -141,8 +144,9 @@ locals {
 }
 
 
-# Create a Linux VM if os_type is Ubuntu, otherwise create a Windows VM
+#################################### Create a Linux VM if os_type is Ubuntu, otherwise create a Windows VM ######################
 
+################## Create Linux VM ##############################
 resource "azurerm_linux_virtual_machine" "machin" {
   #count               = var.os_type == "Windows" ? 0 : 1
   count               = local.is_windows ? 0 : 1
@@ -176,6 +180,7 @@ resource "azurerm_linux_virtual_machine" "machin" {
 
 }
 
+################## Create Windows VM ##############################
 resource "azurerm_windows_virtual_machine" "vm" {
   #count               = var.os_type == "Windows" ? 1 : 0
   count               = local.is_windows ? 1 : 0
@@ -247,6 +252,7 @@ resource "azurerm_virtual_machine_extension" "aad_login_linux" {
   settings            = "{}"
 }
 
+############## Assign VM Admin Login Role to Entra ID User ##################
 data "azuread_user" "vm_user" {
   user_principal_name = var.entraid_user_upn
 }
@@ -257,7 +263,7 @@ resource "azurerm_role_assignment" "vm_login" {
   principal_id         = data.azuread_user.vm_user.object_id
 }
 
-
+################ Create CPU Utilization Alert #############################
 resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
   name                  = "Alert_Cpu-Utlization"
   resource_group_name   = azurerm_resource_group.RG.name
@@ -285,6 +291,9 @@ resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
 }
 
 # Uncomment the following block if you want to create a data disk and attach it to the VM
+
+################# resource "azurerm_managed_disk" "datadisk" ###############################
+
 resource "azurerm_managed_disk" "datadisk" {
   count                = var.data_disk_size > 0 ? 1 : 0
   name                 = "${var.vm_name}-datadisk"
