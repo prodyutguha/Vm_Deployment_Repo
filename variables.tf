@@ -62,7 +62,7 @@ variable "data_disk_size" {
   default     = 0
 }
 
-variable "entraid_user_upn" {
-  description = "UPN of Entra ID user allowed to login"
+variable "vm_login_group_name" {
+  description = "Entra ID Security Group allowed to login to VM"
   type        = string
 }

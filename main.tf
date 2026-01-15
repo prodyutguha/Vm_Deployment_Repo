@@ -252,15 +252,16 @@ resource "azurerm_virtual_machine_extension" "aad_login_linux" {
   settings            = "{}"
 }
 
-############## Assign VM Admin Login Role to Entra ID User ##################
-data "azuread_user" "vm_user" {
-  user_principal_name = var.entraid_user_upn
+
+data "azuread_group" "vm_login_group" {
+  display_name     = var.vm_login_group_name
+  security_enabled = true
 }
 
-resource "azurerm_role_assignment" "vm_login" {
+resource "azurerm_role_assignment" "vm_login_group" {
   scope                = local.is_windows ? azurerm_windows_virtual_machine.vm[0].id : azurerm_linux_virtual_machine.machin[0].id
   role_definition_name = "Virtual Machine Administrator Login"
-  principal_id         = data.azuread_user.vm_user.object_id
+  principal_id         = data.azuread_group.vm_login_group.object_id
 }
 
 ################ Create CPU Utilization Alert #############################
