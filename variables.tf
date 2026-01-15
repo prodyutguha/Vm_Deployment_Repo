@@ -66,3 +66,9 @@ variable "vm_login_group_name" {
   description = "Entra ID Security Group allowed to login to VM"
   type        = string
 }
+
+variable "tenant_id" {
+  description = "Entra ID Tenant ID (required for AAD Login extension)"
+  type        = string
+  default = "33227e13-4782-47ac-9543-62baa1a210a4"
+}

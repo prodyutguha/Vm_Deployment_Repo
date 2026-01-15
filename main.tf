@@ -233,13 +233,16 @@ resource "azurerm_monitor_action_group" "main" {
 }
 ############### Enable AAD Login Extension #############################
 resource "azurerm_virtual_machine_extension" "aad_login_windows" {
-  count               = local.is_windows ? 1 : 0
-  name                = "AADLoginForWindows"
-  virtual_machine_id  = azurerm_windows_virtual_machine.vm[0].id
-  publisher           = "Microsoft.Azure.ActiveDirectory"
-  type                = "AADLoginForWindows"
+  count                = local.is_windows ? 1 : 0
+  name                 = "AADLoginForWindows"
+  virtual_machine_id   = azurerm_windows_virtual_machine.vm[0].id
+  publisher            = "Microsoft.Azure.ActiveDirectory"
+  type                 = "AADLoginForWindows"
   type_handler_version = "2.0"
-  settings            = "{}"
+
+  settings = jsonencode({
+    mdmId = var.tenant_id
+  })
 }
 
 resource "azurerm_virtual_machine_extension" "aad_login_linux" {
