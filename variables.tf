@@ -61,3 +61,8 @@ variable "data_disk_size" {
   type        = number
   default     = 0
 }
+
+variable "entraid_user_upn" {
+  description = "UPN of Entra ID user allowed to login"
+  type        = string
+}
