@@ -2,13 +2,13 @@
 
 ################# Create Resource Group ####################
 resource "azurerm_resource_group" "RG" {
-  name     = "${var.vm_name}-rg"
+  name     = "RG-${var.vm_name}-001"
   location = "West Europe"
 }
 
 ### Create Network Security Group ########################
 resource "azurerm_network_security_group" "NSG" {
-  name                = "${var.vm_name}-nsg"
+  name                = "nsg-${var.vm_name}-001"
   location            = azurerm_resource_group.RG.location
   resource_group_name = azurerm_resource_group.RG.name
 
