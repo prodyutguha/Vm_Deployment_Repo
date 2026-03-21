@@ -329,6 +329,28 @@ resource "azurerm_monitor_activity_log_alert" "patch_failure_alert" {
     action_group_id = azurerm_monitor_action_group.main.id
   }
 }
+
+################ Create Patch Assessment Failure Alert #############################
+
+resource "azurerm_monitor_activity_log_alert" "aum_assessment_failure" {
+  name                = "AUM-Periodic-Assessment-Failure"
+  resource_group_name = azurerm_resource_group.RG.name
+  location            = "Global"
+  scopes              = [azurerm_resource_group.RG.id]
+  description         = "Triggers when a periodic patch assessment fails."
+
+  criteria {
+    category       = "Administrative"
+    # Note the change to 'assessPatches'
+    operation_name = "Microsoft.Compute/virtualMachines/assessPatches/action"
+    level          = "Error" 
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.main.id
+  }
+}
+
 # Uncomment the following block if you want to create a data disk and attach it to the VM
 
 ################# resource "azurerm_managed_disk" "datadisk" ###############################
