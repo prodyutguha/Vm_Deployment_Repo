@@ -485,7 +485,7 @@ resource "azurerm_maintenance_configuration" "maintenance_configuration" {
     }
     reboot  = "Always"
   }
-  #tags = var.tags
+  tags = var.tags
 }
 
 
