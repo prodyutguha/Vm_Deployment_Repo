@@ -216,7 +216,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   patch_assessment_mode = "AutomaticByPlatform"
   bypass_platform_safety_checks_on_user_schedule_enabled = true
 
-  tags = { "Patch Group ID" = "T02-NONPROD-WEU-GR1" }
+  tags = { "Patch_Group_ID" = "T02-NONPROD-WEU-GR1" }
 
   identity {type = "SystemAssigned"}
 }
@@ -456,37 +456,37 @@ resource "azurerm_virtual_machine_data_disk_attachment" "datadisk_attach_linux" 
 # }
 
 
-# resource "azurerm_resource_group" "Patching_RG" {
-#   name     = "Patching_Windows"
-#   location = "West Europe"
-# }
+resource "azurerm_resource_group" "Patching_RG" {
+  name     = "AUM-Patching-ResourcesGroup"
+  location = "West Europe"
+}
 
-# resource "azurerm_maintenance_configuration" "maintenance_configuration" {
-#   for_each = { for Patch_Group_ID, properties in var.Patch_Group_ID : Patch_Group_ID => properties }
-#   name  = each.key
-#   resource_group_name  = azurerm_resource_group.Patching_RG.name
-#   location  = "West Europe"
-#   scope = "InGuestPatch"
-#   in_guest_user_patch_mode = "User"
+resource "azurerm_maintenance_configuration" "maintenance_configuration" {
+  for_each = { for Patch_Group_ID, properties in var.Patch_Group_ID : Patch_Group_ID => properties }
+  name  = each.key
+  resource_group_name  = azurerm_resource_group.Patching_RG.name
+  location  = "West Europe"
+  scope = "InGuestPatch"
+  in_guest_user_patch_mode = "User"
 
-#   window {
-#     start_date_time = var.start_date_time
-#     expiration_date_time  = var.expiration_date_time
-#     duration  = "02:00"
-#     time_zone = "India Standard Time"
-#     recur_every = each.value.recur_every
-#   }
+  window {
+    start_date_time = var.start_date_time
+    expiration_date_time  = var.expiration_date_time
+    duration  = "02:00"
+    time_zone = "India Standard Time"
+    recur_every = each.value.recur_every
+  }
 
-#   install_patches {
-#     windows {
-#       classifications_to_include  = var.classifications_to_include
-#       kb_numbers_to_exclude  = var.kb_number_to_exclude
-#       kb_numbers_to_include  = var.kb_number_to_include
-#     }
-#     reboot  = "Always"
-#   }
-#   #tags = var.tags
-# }
+  install_patches {
+    windows {
+      classifications_to_include  = var.classifications_to_include
+      kb_numbers_to_exclude  = var.kb_number_to_exclude
+      kb_numbers_to_include  = var.kb_number_to_include
+    }
+    reboot  = "Always"
+  }
+  #tags = var.tags
+}
 
 
 # resource "azurerm_maintenance_assignment_dynamic_scope" "maintenance_assignment_dynamic" {
@@ -494,10 +494,11 @@ resource "azurerm_virtual_machine_data_disk_attachment" "datadisk_attach_linux" 
 #   name = "scope-${each.key}"
 #   maintenance_configuration_id = azurerm_maintenance_configuration.maintenance_configuration[each.key].id
 
+
 #   filter {
-#     locations = ["East US"]
+#     locations = ["West Europe"]
 #     os_types = ["Windows"]
-#     resource_groups = ["azurerm_resource_group.RG.name"]
+#     #resource_groups = ["azurerm_resource_group.RG.name"]
 #     resource_types = ["Microsoft.Compute/virtualMachines"]
 #     tags {
 #       tag = "Patch Group ID"
@@ -505,3 +506,30 @@ resource "azurerm_virtual_machine_data_disk_attachment" "datadisk_attach_linux" 
 #     }
 #   }
 # }
+
+resource "azapi_resource" "maintenance_assignment_dynamic" {
+  for_each = { for Patch_Group_ID, properties in var.Patch_Group_ID : Patch_Group_ID => properties }
+
+  type      = "Microsoft.Maintenance/configurationAssignments@2023-04-01"
+  name      = "scope-${each.key}"
+  # This is where the assignment is stored (usually your central MGMT subscription)
+  parent_id = "/subscriptions/84a4c20d-c4cc-44d6-8a5b-23f7253c12c4" 
+
+  body = jsonencode({
+    properties = {
+      maintenanceConfigurationId = azurerm_maintenance_configuration.maintenance_configuration[each.key].id
+      resourceId                 = "/providers/Microsoft.Management/managementGroups/33227e13-4782-47ac-9543-62baa1a210a4"
+      filter = {
+        locations     = ["West Europe"]
+        osTypes       = ["Windows"]
+        resourceTypes = ["Microsoft.Compute/virtualMachines"]
+        tagSettings = {
+          filterOperator = "All"
+          tags = {
+            "Patch_Group_ID" = [each.key]
+          }
+        }
+      }
+    }
+  })
+}
