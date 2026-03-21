@@ -351,6 +351,28 @@ resource "azurerm_monitor_activity_log_alert" "aum_assessment_failure" {
   }
 }
 
+################ Create Patch Success Alert #############################
+
+resource "azurerm_monitor_activity_log_alert" "patch_success_alert" {
+  name                = "AUM-Patch-Installation-Success"
+  resource_group_name = azurerm_resource_group.RG.name
+  location            = "Global"
+  scopes              = [azurerm_resource_group.RG.id]
+  description         = "Triggers when an Azure Update Manager patch installation completes successfully."
+
+  criteria {
+    category          = "Administrative"
+    operation_name    = "Microsoft.Compute/virtualMachines/installPatches/action"
+    # This targets only the successful completions
+    status            = "Succeeded"
+    level             = "Informational"
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.main.id
+  }
+}
+
 # Uncomment the following block if you want to create a data disk and attach it to the VM
 
 ################# resource "azurerm_managed_disk" "datadisk" ###############################
