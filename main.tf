@@ -326,7 +326,7 @@ resource "azurerm_monitor_activity_log_alert" "patch_failure_alert" {
   }
 
   action {
-    action_group_id = azurerm_monitor_action_group.main.id
+    action_group_id = azurerm_monitor_action_group.patch_alert_group.id
   }
 }
 
@@ -347,7 +347,7 @@ resource "azurerm_monitor_activity_log_alert" "aum_assessment_failure" {
   }
 
   action {
-    action_group_id = azurerm_monitor_action_group.main.id
+    action_group_id = azurerm_monitor_action_group.patch_alert_group.id
   }
 }
 
@@ -369,7 +369,7 @@ resource "azurerm_monitor_activity_log_alert" "patch_success_alert" {
   }
 
   action {
-    action_group_id = azurerm_monitor_action_group.main.id
+    action_group_id = azurerm_monitor_action_group.patch_alert_group.id
   }
 }
 
