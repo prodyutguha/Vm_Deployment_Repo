@@ -15,7 +15,7 @@ variable "kb_number_to_include" {
 
 variable "start_date_time" {
   type = string
-  default = "2026-03-21 18:00"
+  default = "2026-03-22 18:00"
 }
 
 variable "expiration_date_time" {
