@@ -295,6 +295,40 @@ resource "azurerm_monitor_metric_alert" "alert_cpu_utlization" {
   }
 }
 
+################ Create Patch Installation Failure Alert #############################
+resource "azurerm_monitor_action_group" "patch_alert_group" {
+  name                = "PatchFailureActionGroup"
+  resource_group_name = azurerm_resource_group.RG.name
+  short_name          = "patch-audit"
+
+  email_receiver {
+    name                    = "send-to-admin"
+    email_address           = "prodyut@kloudguardian.com"
+    use_common_alert_schema = true
+  }
+}
+
+resource "azurerm_monitor_activity_log_alert" "patch_failure_alert" {
+  name                = "AUM-Patch-Installation-Failure"
+  resource_group_name = azurerm_resource_group.RG.name
+  scopes              = [azurerm_resource_group.RG.id]
+  description         = "Triggers when an Azure Update Manager patch installation fails."
+  location            = "Global"
+
+  criteria {
+    resource_provider = "Microsoft.Compute"
+    operation_name    = "Microsoft.Compute/virtualMachines/installPatches/action"
+    category          = "Administrative"
+    level             = "Error" # This captures "Failed" or "Error" statuses
+    
+    # Optional: Filter for a specific status specifically if Level is too broad
+    # status          = "Failed"
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.main.id
+  }
+}
 # Uncomment the following block if you want to create a data disk and attach it to the VM
 
 ################# resource "azurerm_managed_disk" "datadisk" ###############################
